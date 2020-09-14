@@ -1,4 +1,4 @@
-class Satellite {
+export class Satellite {
   name:     string;
   distance: number;
   message:  string[];

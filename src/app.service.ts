@@ -1,9 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { TopSecretRequest } from './dto/top-secret.request';
+import { Satellite, TopSecretRequest } from './dto/top-secret.request';
 import { posEmit, TopSecretResponse } from './dto/top-secret.response';
 
 @Injectable()
 export class AppService {
+
+
+  satellitesGlobal: Satellite[] = []
+
   getHello(): string {
     return 'Hello World!';
   }
@@ -119,32 +123,65 @@ export class AppService {
       throw new BadRequestException(null,'Error verifique el request')
     }
 
-    const distances : number [] = []
-    const phrases : string [][] = []
-
-    topSecretRequest.satellites.forEach(satellite => {
-      distances.push(satellite.distance)
-      phrases.push(satellite.message)
-    });
-
     const response: TopSecretResponse = new TopSecretResponse();
+    try {
+      const distances : number [] = []
+      const phrases : string [][] = []
 
-    const distanceKenobi = distances[0]
-    const distanceSkywalker = distances[1]
-    const distanceSato = distances[2]
+      topSecretRequest.satellites.forEach(satellite => {
+        distances.push(satellite.distance)
+        phrases.push(satellite.message)
+      });
 
-    const positionEmit : number[] = await this.getLocation(distanceKenobi, distanceSkywalker, distanceSato);
 
-    const position = new posEmit()
-    position.x = positionEmit[0]
-    position.y = positionEmit[1]
 
-    // set emisor pos
-    response.position = position
+      const distanceKenobi = distances[0]
+      const distanceSkywalker = distances[1]
+      const distanceSato = distances[2]
 
-    // set hidden message
-    response.message = this.getMessage(phrases)
+      const positionEmit : number[] = await this.getLocation(distanceKenobi, distanceSkywalker, distanceSato);
+
+      const position = new posEmit()
+      position.x = positionEmit[0]
+      position.y = positionEmit[1]
+
+      // set emisor pos
+      response.position = position
+
+      // set hidden message
+      response.message = this.getMessage(phrases)
+
+    }catch (e) {
+      throw new BadRequestException(null,'No hay suficiente información para calcular')
+    }
 
     return response
+  }
+
+  /**
+   * agrgear satelites en diferenets post.
+   * @param satelliteRequest
+   */
+  async topSecretSplit(satelliteRequest: Satellite) : Promise<boolean> {
+
+    if (satelliteRequest && satelliteRequest.message && satelliteRequest.distance > 0){
+
+      this.satellitesGlobal.push(satelliteRequest);
+      return true
+    }
+
+    return false
+
+  }
+
+  /**
+   * calcular top secret global
+   */
+  async topSecretGet() : Promise<TopSecretResponse>{
+
+    const topSecretRequest: TopSecretRequest = new TopSecretRequest();
+
+    topSecretRequest.satellites = this.satellitesGlobal;
+    return this.topSecret(topSecretRequest)
   }
 }

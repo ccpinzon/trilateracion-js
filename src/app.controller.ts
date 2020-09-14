@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AppService } from './app.service';
-import { TopSecretRequest } from './dto/top-secret.request';
+import { Satellite, TopSecretRequest } from './dto/top-secret.request';
 import { TopSecretResponse } from './dto/top-secret.response';
 
 @Controller()
@@ -16,6 +16,16 @@ export class AppController {
   @Post('topsecret')
   async topSecret(@Body() topSecretRequest: TopSecretRequest): Promise<TopSecretResponse> {
     return await this.appService.topSecret(topSecretRequest);
+  }
+
+  @Post('topsecret_split')
+  async topSecretSplit(@Body() satelliteRequest: Satellite): Promise<Boolean> {
+    return await this.appService.topSecretSplit(satelliteRequest);
+  }
+
+  @Get('topsecret_split')
+  async topSecretSplitGet(): Promise<TopSecretResponse> {
+    return await this.appService.topSecretGet();
   }
 
   @Get('getlocation')
