@@ -123,6 +123,9 @@ export class AppService {
       throw new BadRequestException(null,'Error verifique el request')
     }
 
+    // clean global
+    this.satellitesGlobal = []
+
     const response: TopSecretResponse = new TopSecretResponse();
     try {
       const distances : number [] = []
